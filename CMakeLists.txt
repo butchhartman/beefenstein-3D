@@ -14,13 +14,13 @@ project ("GPbase")
 # Add source to the gl3w library to be generated 
 # This step only needs to be done once to generate the library. The source file for the gl3w library has since been removed from the project.
 # gl3w will need to be recompiled and added in order to generate this library again.
-#add_library (gl3wlib STATIC "src/GL3W/gl3w.c")
+# add_library (LoadShaders STATIC "src/LoadShaders.cpp")
 
 # Add link director(y/ies) for libraries
 link_directories ("lib")
 
 # Add source to this project's executable.
-add_executable (GPbase "src/GPbase.c"  "include/GPbase.h")
+add_executable (GPbase "src/GPbase.c"  "include/GPbase.h" "include/LoadShaders.h"  "lib/LoadShaders.cpp")
 
 # Add libraries to this project's executable.
 # Simply can specify the name of the library because CMake knows to look in the lib folder.

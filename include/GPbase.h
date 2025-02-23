@@ -13,3 +13,16 @@
 // Window creation library. Also handles other things like input.
 #include "GLFW/glfw3.h"
 
+#include "LoadShaders.h"
+
+// Custom defines
+// Global variables
+// Bad practice but useful for this application.
+#define OPENGL_VERSION_MAJOR 4
+#define OPENGL_VERSION_MINOR 6
+
+
+#define DEFAULT_WIDTH 640
+#define DEFAULT_HEIGHT 480
+
+ 
