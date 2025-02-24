@@ -24,13 +24,13 @@ GLuint Buffers[NumBuffers];
 
 GLdouble lastTime;
 
-//Simple glfw error callback.
-//Taken from : https://www.glfw.org/docs/latest/quick_guide.html
+// Simple glfw error callback.
+// Taken from : https://www.glfw.org/docs/latest/quick_guide.html
 void error_callback(int error, const char* description) {
 	fprintf(stderr, "Error: %s\n", description);
 }
 
-//Input callback
+// Input callback
 // Taken from : https://www.glfw.org/docs/latest/quick_guide.html
 static void key_callback(GLFWwindow* window, int key, int scancode, int action, int mods)
 {
@@ -38,6 +38,13 @@ static void key_callback(GLFWwindow* window, int key, int scancode, int action, 
 		printf("\nUser requesting closure of application.");
 		glfwSetWindowShouldClose(window, GLFW_TRUE);
 	}
+}
+
+// Function called when the window is resized
+// Taken from : https://www.glfw.org/docs/3.3/window_guide.html
+void framebuffer_size_callback(GLFWwindow* window, int width, int height)
+{
+	glViewport(0, 0, width, height);
 }
 
 // lol
@@ -69,7 +76,7 @@ GLFWwindow* createGlWindowAndMakeContextCurrent() {
 
 	// Sets the key press callback.
 	glfwSetKeyCallback(window, key_callback);
-
+	glfwSetFramebufferSizeCallback(window, framebuffer_size_callback);
 	// Make the window context current.
 	glfwMakeContextCurrent(window);
 
@@ -137,9 +144,9 @@ int main()
 	// TODO : Figure out way to stop this from producing GPU-melting number of frames
 	// Main loop which draws, updates, and polls events from the window. This must exist for the window to function
 	while (!glfwWindowShouldClose(window)) {
-		GLdouble elapsedTime = glfwGetTime() - lastTime;
-		lastTime = glfwGetTime();
-		printf("\nTime Since Last Frame: %.8f", elapsedTime);
+		//GLdouble elapsedTime = glfwGetTime() - lastTime;
+		//lastTime = glfwGetTime();
+		//printf("\nTime Since Last Frame: %.8f", elapsedTime);
 
 		draw();
 		// Swaps the display buffers of glfw. In other words, updates what's on screen.
