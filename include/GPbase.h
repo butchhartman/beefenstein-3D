@@ -13,6 +13,8 @@
 // Window creation library. Also handles other things like input.
 #include "GLFW/glfw3.h"
 
+#include "cglm/cglm.h"
+
 #include "LoadShaders.h"
 
 // Custom defines
