@@ -16,6 +16,9 @@ project ("GPbase")
 # gl3w will need to be recompiled and added in order to generate this library again.
 # add_library (LoadShaders STATIC "src/LoadShaders.cpp")
 
+# Add extern subdir
+add_subdirectory(extern)
+
 # Add link director(y/ies) for libraries
 link_directories ("lib")
 
@@ -24,8 +27,8 @@ add_executable (GPbase "src/GPbase.c"  "include/GPbase.h" "include/LoadShaders.h
 
 # Add libraries to this project's executable.
 # Simply can specify the name of the library because CMake knows to look in the lib folder.
-target_link_libraries (GPbase glfw3 gl3wlib)
 
+target_link_libraries (GPbase glfw3 gl3wlib cglm)
 if (CMAKE_VERSION VERSION_GREATER 3.12)
   set_property(TARGET GPbase PROPERTY C_STANDARD 23)
 endif()
