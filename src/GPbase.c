@@ -1,12 +1,9 @@
-﻿// GPbase.cpp : Defines the entry point for the application.
-//
+﻿// OpenGL Documentation : https://registry.khronos.org/OpenGL-Refpages/gl4/html/glVertexAttribPointer.xhtml
 
 // Much of the following code was directly taken and/or modified from the following sources:
 // https://books.google.com/books?id=vUK1DAAAQBAJ
 // https://www.glfw.org/docs/latest/quick_guide.html
 // https://github.com/skaslev/gl3w
-
-// TODO : Read & comprehend explanation of code from red book. Also comment so I don't lose my understanding
 
 #include "../include/GPbase.h"
 
@@ -93,13 +90,19 @@ GLFWwindow* createGlWindowAndMakeContextCurrent() {
 }
 
 void initBuffers() {
-	static const GLfloat vertices[6][2] = {
-		{ -0.90f, -0.90f }, // t1
-		{  0.85f, -0.90f },
-		{ -0.90f,  0.85f },
-		{  0.90f, -0.85f }, // t2
-		{  0.90f,  0.90f },
-		{ -0.85f,  0.90f }
+	static const GLfloat vertices[6][6] = {
+		// FORMAT : First three values are clip-space coordinates.
+		//			Last three values are RGB values.
+
+		// Triangle 1 vertex and color data.
+		{ -0.90f, -0.90f, 1.0f, 1.0f, 0.0f, 0.0f },
+		{  0.85f, -0.90f, 1.0f, 0.0f, 1.0f, 0.0f },
+		{ -0.90f,  0.85f, 1.0f, 0.0f, 0.0f, 1.0f },
+
+		// Triangle 1 vertex and color data.
+		{  0.90f, -0.85f, 1.0f, 1.0f, 0.0f, 0.0f },
+		{  0.90f,  0.90f, 1.0f, 0.0f, 1.0f, 0.0f },
+		{ -0.85f,  0.90f, 1.0f, 0.0f, 0.0f, 1.0f },
 	};
 
 	// Generates a VAO and returns its ID to the second parameter.
@@ -117,11 +120,25 @@ void initBuffers() {
 	// Buffers data into the currently bound VBO.
 	glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_STATIC_DRAW);
 
-	// Defines the format to use when reading the data from the VBO
-	glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, 0, (void*)(0));
+	/* IMPORTANT : Multi-dimensional arrays are treated the same as one dimensional arrays by glVertexAttribPointer
+	 i.e {1.0f, 2.0f, 3.0f}
+		 {4.0f, 5.0f, 6.0f}
+	 index[0] IS NOT the entire first array
+	 index[0] is 1.0f
+	 index[4] is 5.0f
 
-	// Enables the previously defined Vertex Attrib Pointer via its index.
+     Additionally :
+     Stride and offset are BOTH in bytes.
+     This means they both should be written as (num of values) * sizeof(value type)
+ */
+
+	// Defines the format to use when reading the data from the VBO
+	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 6 * sizeof(float), (void*)(0));
+
+	glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 6 * sizeof(float), (void*)(3 * sizeof(float)));
+	// Enables the previously defined Vertex Attrib Pointers via their indicies.
 	glEnableVertexAttribArray(0);
+	glEnableVertexAttribArray(1);
 
 	ShaderInfo shaders[] = {
 		{GL_VERTEX_SHADER, "../../src/Shaders/triangles.vert"},
