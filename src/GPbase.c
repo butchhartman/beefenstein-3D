@@ -1,12 +1,9 @@
-﻿// GPbase.cpp : Defines the entry point for the application.
-//
+﻿// OpenGL Documentation : https://registry.khronos.org/OpenGL-Refpages/gl4/html/glVertexAttribPointer.xhtml
 
 // Much of the following code was directly taken and/or modified from the following sources:
 // https://books.google.com/books?id=vUK1DAAAQBAJ
 // https://www.glfw.org/docs/latest/quick_guide.html
 // https://github.com/skaslev/gl3w
-
-// TODO : Read & comprehend explanation of code from red book. Also comment so I don't lose my understanding
 
 #include "../include/GPbase.h"
 
@@ -14,13 +11,21 @@
 //TODO : Make functions less of a clusterfuck.
 
 
-// TODO : Replace these
-enum VAO_IDs { Triangles, NumVAOs };
-enum Buffer_IDS { ArrayBuffer, NumBuffers };
-enum Attrib_IDs { vPosition = 0};
+// VAOs hold VBOs
+// Taken from : https://www.khronos.org/opengl/wiki/Tutorial2:_VAOs,_VBOs,_Vertex_and_Fragment_Shaders_(C_/_SDL)
+/*A Vertex Array Object (VAO) is an object which contains one or more Vertex Buffer Objects and is designed to store 
+the information for a complete rendered object.
+*/
+GLuint VAO;
 
-GLuint VAOs[NumVAOs];
-GLuint Buffers[NumBuffers];
+// VBOs hold vertex data
+// Taken from : https://www.khronos.org/opengl/wiki/Tutorial2:_VAOs,_VBOs,_Vertex_and_Fragment_Shaders_(C_/_SDL)
+/*A Vertex Buffer Object (VBO) is a memory buffer in the high speed memory of your video card designed to hold 
+information about vertices. VBOs can also store information such as normals, 
+texcoords, indicies, etc.
+*/
+GLuint VBO;
+
 
 GLdouble lastTime;
 
@@ -47,7 +52,6 @@ void framebuffer_size_callback(GLFWwindow* window, int width, int height)
 	glViewport(0, 0, width, height);
 }
 
-// lol
 GLFWwindow* createGlWindowAndMakeContextCurrent() {
 	if (!glfwInit()) {
 		fprintf(stderr, "\nWARNING : glfw initialization failed.");
@@ -86,41 +90,72 @@ GLFWwindow* createGlWindowAndMakeContextCurrent() {
 }
 
 void initBuffers() {
-	// TODO : This next.
-	static const GLfloat vertices[6][2] = {
-		{ -0.90f, -0.90f }, // t1
-		{  0.85f, -0.90f },
-		{ -0.90f,  0.85f },
-		{  0.90f, -0.85f }, // t2
-		{  0.90f,  0.90f },
-		{ -0.85f,  0.90f }
+	static const GLfloat vertices[6][6] = {
+		// FORMAT : First three values are clip-space coordinates.
+		//			Last three values are RGB values.
+
+		// Triangle 1 vertex and color data.
+		{ -0.90f, -0.90f, 1.0f, 1.0f, 0.0f, 0.0f },
+		{  0.85f, -0.90f, 1.0f, 0.0f, 1.0f, 0.0f },
+		{ -0.90f,  0.85f, 1.0f, 0.0f, 0.0f, 1.0f },
+
+		// Triangle 1 vertex and color data.
+		{  0.90f, -0.85f, 1.0f, 1.0f, 0.0f, 0.0f },
+		{  0.90f,  0.90f, 1.0f, 0.0f, 1.0f, 0.0f },
+		{ -0.85f,  0.90f, 1.0f, 0.0f, 0.0f, 1.0f },
 	};
 
-	glCreateBuffers(NumBuffers, Buffers);
-	glNamedBufferStorage(Buffers[ArrayBuffer], sizeof(vertices), vertices, 0);
+	// Generates a VAO and returns its ID to the second parameter.
+	// The second parameter can also be a table.
+	glGenVertexArrays(1, &VAO);
+	// Binds the VAO, setting it as the one currently in use by OpenGL.
+	glBindVertexArray(VAO);
+
+	// Generates a VBO and returns its ID to the second parameter.
+	// The second parameter can also be a table.
+	glCreateBuffers(1, &VBO);
+	// Binds the VBO, setting it as the one currently in use by OpenGL.
+	glBindBuffer(GL_ARRAY_BUFFER, VBO);
+
+	// Buffers data into the currently bound VBO.
+	glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_STATIC_DRAW);
+
+	/* IMPORTANT : Multi-dimensional arrays are treated the same as one dimensional arrays by glVertexAttribPointer
+	 i.e {1.0f, 2.0f, 3.0f}
+		 {4.0f, 5.0f, 6.0f}
+	 index[0] IS NOT the entire first array
+	 index[0] is 1.0f
+	 index[4] is 5.0f
+
+     Additionally :
+     Stride and offset are BOTH in bytes.
+     This means they both should be written as (num of values) * sizeof(value type)
+ */
+
+	// Defines the format to use when reading the data from the VBO
+	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 6 * sizeof(float), (void*)(0));
+
+	glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 6 * sizeof(float), (void*)(3 * sizeof(float)));
+	// Enables the previously defined Vertex Attrib Pointers via their indicies.
+	glEnableVertexAttribArray(0);
+	glEnableVertexAttribArray(1);
 
 	ShaderInfo shaders[] = {
 		{GL_VERTEX_SHADER, "../../src/Shaders/triangles.vert"},
 		{GL_FRAGMENT_SHADER, "../../src/Shaders/triangles.frag"},
 		{GL_NONE, NULL}
 	};
-
+	// Loads shaders via the Red Book's LoadShaders function. Returns a shader program ID
 	GLuint program = LoadShaders(shaders);
+	// Sets the loaded shader program as the one currently in use.
 	glUseProgram(program);
-
-	glGenVertexArrays(NumVAOs, VAOs);
-	glBindVertexArray(VAOs[Triangles]);
-	glBindBuffer(GL_ARRAY_BUFFER, Buffers[ArrayBuffer]);
-	glVertexAttribPointer(vPosition, 2, GL_FLOAT, 
-						  GL_FALSE, 0, (void*)(0));
-	glEnableVertexAttribArray(vPosition);
 }
 
 void draw() {
 	static const float black[] = { 0.0f, 0.0f, 0.0f, 0.0f};
 	glClearBufferfv(GL_COLOR, 0, black);
 
-	glBindVertexArray(VAOs[Triangles]);
+	// Draws using the data found in the VBO.
 	glDrawArrays(GL_TRIANGLES, 0, 6);
 }
 
