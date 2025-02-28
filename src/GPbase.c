@@ -27,30 +27,8 @@ texcoords, indicies, etc.
 GLuint VBO;
 
 
-GLdouble lastTime;
 
-// Simple glfw error callback.
-// Taken from : https://www.glfw.org/docs/latest/quick_guide.html
-void error_callback(int error, const char* description) {
-	fprintf(stderr, "Error: %s\n", description);
-}
 
-// Input callback
-// Taken from : https://www.glfw.org/docs/latest/quick_guide.html
-static void key_callback(GLFWwindow* window, int key, int scancode, int action, int mods)
-{
-	if (key == GLFW_KEY_ESCAPE && action == GLFW_PRESS) {
-		printf("\nUser requesting closure of application.");
-		glfwSetWindowShouldClose(window, GLFW_TRUE);
-	}
-}
-
-// Function called when the window is resized
-// Taken from : https://www.glfw.org/docs/3.3/window_guide.html
-void framebuffer_size_callback(GLFWwindow* window, int width, int height)
-{
-	glViewport(0, 0, width, height);
-}
 
 GLFWwindow* createGlWindowAndMakeContextCurrent() {
 	if (!glfwInit()) {
@@ -84,11 +62,10 @@ GLFWwindow* createGlWindowAndMakeContextCurrent() {
 	// Make the window context current.
 	glfwMakeContextCurrent(window);
 
-	lastTime = glfwGetTime();
-
 	return window;
 }
 
+// In its current state, only generates the VBO and VAO
 void initBuffers() {
 	static const GLfloat vertices[6][6] = {
 		// FORMAT : First three values are clip-space coordinates.
@@ -115,10 +92,10 @@ void initBuffers() {
 	// The second parameter can also be a table.
 	glCreateBuffers(1, &VBO);
 	// Binds the VBO, setting it as the one currently in use by OpenGL.
-	glBindBuffer(GL_ARRAY_BUFFER, VBO);
+	//glBindBuffer(GL_ARRAY_BUFFER, VBO);
 
 	// Buffers data into the currently bound VBO.
-	glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_STATIC_DRAW);
+	//glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_STATIC_DRAW);
 
 	/* IMPORTANT : Multi-dimensional arrays are treated the same as one dimensional arrays by glVertexAttribPointer
 	 i.e {1.0f, 2.0f, 3.0f}
@@ -133,12 +110,12 @@ void initBuffers() {
  */
 
 	// Defines the format to use when reading the data from the VBO
-	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 6 * sizeof(float), (void*)(0));
+	//glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 6 * sizeof(float), (void*)(0));
 
-	glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 6 * sizeof(float), (void*)(3 * sizeof(float)));
+	//glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 6 * sizeof(float), (void*)(3 * sizeof(float)));
 	// Enables the previously defined Vertex Attrib Pointers via their indicies.
-	glEnableVertexAttribArray(0);
-	glEnableVertexAttribArray(1);
+	//glEnableVertexAttribArray(0);
+	//glEnableVertexAttribArray(1);
 
 	ShaderInfo shaders[] = {
 		{GL_VERTEX_SHADER, "../../src/Shaders/triangles.vert"},
@@ -151,13 +128,17 @@ void initBuffers() {
 	glUseProgram(program);
 }
 
-void draw() {
-	static const float black[] = { 0.0f, 0.0f, 0.0f, 0.0f};
-	glClearBufferfv(GL_COLOR, 0, black);
+// deprecated
+//void draw() {
+//	static const float black[] = { 0.0f, 0.0f, 0.0f, 0.0f};
+//	glClearBufferfv(GL_COLOR, 0, black);
+//
+//	// Draws using the data found in the VBO.
+//	glDrawArrays(GL_TRIANGLES, 0, 6);
+//}
 
-	// Draws using the data found in the VBO.
-	glDrawArrays(GL_TRIANGLES, 0, 6);
-}
+
+
 
 int main()
 {
@@ -175,15 +156,76 @@ int main()
 	
 	initBuffers();
 
+	glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
 
 	// TODO : Figure out way to stop this from producing GPU-melting number of frames
 	// Main loop which draws, updates, and polls events from the window. This must exist for the window to function
 	while (!glfwWindowShouldClose(window)) {
-		//GLdouble elapsedTime = glfwGetTime() - lastTime;
-		//lastTime = glfwGetTime();
-		//printf("\nTime Since Last Frame: %.8f", elapsedTime);
+		glClear(GL_COLOR_BUFFER_BIT);
 
-		draw();
+		updateFPSTracker(5, 0);
+/*
+		for (float i = 0.0; i < 640; i++) {
+			
+			vec3 lineStart = { ( i / (640 / 2) - 1), -0.5f, 1.0f };
+			vec3 lineEnd = { (i / (640 / 2) - 1), 0.5f, 1.0f };
+			vec3 color = { 0.1f, 0.25f, 0.5f };
+
+			Line vertLine;
+			glm_vec3_copy(lineStart, vertLine.vertexStart);
+			glm_vec3_copy(lineEnd, vertLine.vertexEnd);
+			glm_vec3_copy(color, vertLine.vColor1);
+			glm_vec3_copy(color, vertLine.vColor2);
+
+			Point singlePoint;
+			glm_vec3_copy(lineStart, singlePoint.vertexCoordinates);
+			glm_vec3_copy(color, singlePoint.vColor);
+
+			drawLine(vertLine, VBO);
+			//drawPoint(singlePoint, VBO);
+		}*/
+
+		
+		// Very obtuse way to draw triangles.
+		// Mostly exists to keep the master branch as a 'Hello Triangles' type deal.
+		Triangle tri = { 0 };
+		vec3 v1 = { -0.90f, -0.90f, 1.0f };
+		vec3 v2 = {0.85f, -0.90f, 1.0f};
+		vec3 v3 = { -0.90f,  0.85f, 1.0f};
+
+		vec3 c1 = {1.0f, 0.0f, 0.0f};
+		vec3 c2 = {0.0f, 0.0f, 1.0f};
+		vec3 c3 = {0.0f, 1.0f, 0.0f};
+
+		glm_vec3_copy(v1, tri.v1);
+		glm_vec3_copy(v2, tri.v2);
+		glm_vec3_copy(v3, tri.v3);
+
+		glm_vec3_copy(c1, tri.vColor1);
+		glm_vec3_copy(c2, tri.vColor2);
+		glm_vec3_copy(c3, tri.vColor3);
+
+		Triangle tri2 = { 0 };
+		vec3 v11 = { 0.90f, -0.85f, 1.0f };
+		vec3 v22 = { 0.90f,  0.90f, 1.0f };
+		vec3 v33 = { -0.85f,  0.90f, 1.0f };
+
+		vec3 c11 = { 0.0f, 0.0f, 1.0f };
+		vec3 c22 = { 1.0f, 0.0f, 0.0f };
+		vec3 c33 = { 0.5f, 0.0f, 0.5f };
+
+		glm_vec3_copy(v11, tri2.v1);
+		glm_vec3_copy(v22, tri2.v2);
+		glm_vec3_copy(v33, tri2.v3);
+
+		glm_vec3_copy(c11, tri2.vColor1);
+		glm_vec3_copy(c22, tri2.vColor2);
+		glm_vec3_copy(c33, tri2.vColor3);
+
+		drawTriangle(tri, VBO);
+		drawTriangle(tri2, VBO);
+		
+
 		// Swaps the display buffers of glfw. In other words, updates what's on screen.
 		glfwSwapBuffers(window);
 		// Processes events. Needed or else the window will be shown as not responding.

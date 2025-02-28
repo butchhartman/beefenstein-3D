@@ -13,10 +13,19 @@
 // Window creation library. Also handles other things like input.
 #include "GLFW/glfw3.h"
 
+// C compatible math library for OpenGL
 #include "cglm/cglm.h"
 
+// Load shaders sourced from the OpenGL Red Book
 #include "LoadShaders.h"
 
+#include "DrawFuncs.h"
+
+#include "FPSProfiling.h"
+
+#include "CallbackFunctions.h"
+
+#include "CommonDefs.h"
 // Custom defines
 // Global variables
 // Bad practice but useful for this application.

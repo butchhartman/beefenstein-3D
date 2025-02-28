@@ -23,7 +23,7 @@ add_subdirectory(extern)
 link_directories ("lib")
 
 # Add source to this project's executable.
-add_executable (GPbase "src/GPbase.c"  "include/GPbase.h" "include/LoadShaders.h"  "lib/LoadShaders.cpp")
+add_executable (GPbase "src/GPbase.c"  "include/GPbase.h" "include/LoadShaders.h"  "lib/LoadShaders.cpp" "src/DrawFuncs.c" "src/FPSProfiling.c" "include/CallbackFunctions.h" "src/CallbackFunctions.c" "include/CommonDefs.h")
 
 # Add libraries to this project's executable.
 # Simply can specify the name of the library because CMake knows to look in the lib folder.
