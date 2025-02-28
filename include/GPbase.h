@@ -25,6 +25,7 @@
 
 #include "CallbackFunctions.h"
 
+#include "CommonDefs.h"
 // Custom defines
 // Global variables
 // Bad practice but useful for this application.

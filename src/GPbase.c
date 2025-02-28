@@ -162,16 +162,69 @@ int main()
 	// Main loop which draws, updates, and polls events from the window. This must exist for the window to function
 	while (!glfwWindowShouldClose(window)) {
 		glClear(GL_COLOR_BUFFER_BIT);
+
 		updateFPSTracker(5, 0);
-		//yikes.. bad performance
-		// next thing to do is make a function to draw lines
+/*
 		for (float i = 0.0; i < 640; i++) {
 			
 			vec3 lineStart = { ( i / (640 / 2) - 1), -0.5f, 1.0f };
 			vec3 lineEnd = { (i / (640 / 2) - 1), 0.5f, 1.0f };
+			vec3 color = { 0.1f, 0.25f, 0.5f };
 
-			drawLine(lineStart, lineEnd, VBO);
-		}
+			Line vertLine;
+			glm_vec3_copy(lineStart, vertLine.vertexStart);
+			glm_vec3_copy(lineEnd, vertLine.vertexEnd);
+			glm_vec3_copy(color, vertLine.vColor1);
+			glm_vec3_copy(color, vertLine.vColor2);
+
+			Point singlePoint;
+			glm_vec3_copy(lineStart, singlePoint.vertexCoordinates);
+			glm_vec3_copy(color, singlePoint.vColor);
+
+			drawLine(vertLine, VBO);
+			//drawPoint(singlePoint, VBO);
+		}*/
+
+		
+		// Very obtuse way to draw triangles.
+		// Mostly exists to keep the master branch as a 'Hello Triangles' type deal.
+		Triangle tri = { 0 };
+		vec3 v1 = { -0.90f, -0.90f, 1.0f };
+		vec3 v2 = {0.85f, -0.90f, 1.0f};
+		vec3 v3 = { -0.90f,  0.85f, 1.0f};
+
+		vec3 c1 = {1.0f, 0.0f, 0.0f};
+		vec3 c2 = {0.0f, 0.0f, 1.0f};
+		vec3 c3 = {0.0f, 1.0f, 0.0f};
+
+		glm_vec3_copy(v1, tri.v1);
+		glm_vec3_copy(v2, tri.v2);
+		glm_vec3_copy(v3, tri.v3);
+
+		glm_vec3_copy(c1, tri.vColor1);
+		glm_vec3_copy(c2, tri.vColor2);
+		glm_vec3_copy(c3, tri.vColor3);
+
+		Triangle tri2 = { 0 };
+		vec3 v11 = { 0.90f, -0.85f, 1.0f };
+		vec3 v22 = { 0.90f,  0.90f, 1.0f };
+		vec3 v33 = { -0.85f,  0.90f, 1.0f };
+
+		vec3 c11 = { 0.0f, 0.0f, 1.0f };
+		vec3 c22 = { 1.0f, 0.0f, 0.0f };
+		vec3 c33 = { 0.5f, 0.0f, 0.5f };
+
+		glm_vec3_copy(v11, tri2.v1);
+		glm_vec3_copy(v22, tri2.v2);
+		glm_vec3_copy(v33, tri2.v3);
+
+		glm_vec3_copy(c11, tri2.vColor1);
+		glm_vec3_copy(c22, tri2.vColor2);
+		glm_vec3_copy(c33, tri2.vColor3);
+
+		drawTriangle(tri, VBO);
+		drawTriangle(tri2, VBO);
+		
 
 		// Swaps the display buffers of glfw. In other words, updates what's on screen.
 		glfwSwapBuffers(window);
