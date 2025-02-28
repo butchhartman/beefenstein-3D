@@ -27,34 +27,8 @@ texcoords, indicies, etc.
 GLuint VBO;
 
 
-GLdouble lastTime;
-GLdouble numFrames = 0;
-GLdouble checkTime;
-GLdouble frameRates[10];
-GLint frameChecks = 0;
 
-// Simple glfw error callback.
-// Taken from : https://www.glfw.org/docs/latest/quick_guide.html
-void error_callback(int error, const char* description) {
-	fprintf(stderr, "Error: %s\n", description);
-}
 
-// Input callback
-// Taken from : https://www.glfw.org/docs/latest/quick_guide.html
-static void key_callback(GLFWwindow* window, int key, int scancode, int action, int mods)
-{
-	if (key == GLFW_KEY_ESCAPE && action == GLFW_PRESS) {
-		printf("\nUser requesting closure of application.");
-		glfwSetWindowShouldClose(window, GLFW_TRUE);
-	}
-}
-
-// Function called when the window is resized
-// Taken from : https://www.glfw.org/docs/3.3/window_guide.html
-void framebuffer_size_callback(GLFWwindow* window, int width, int height)
-{
-	glViewport(0, 0, width, height);
-}
 
 GLFWwindow* createGlWindowAndMakeContextCurrent() {
 	if (!glfwInit()) {
@@ -88,11 +62,10 @@ GLFWwindow* createGlWindowAndMakeContextCurrent() {
 	// Make the window context current.
 	glfwMakeContextCurrent(window);
 
-	lastTime = glfwGetTime();
-
 	return window;
 }
 
+// In its current state, only generates the VBO and VAO
 void initBuffers() {
 	static const GLfloat vertices[6][6] = {
 		// FORMAT : First three values are clip-space coordinates.
@@ -155,75 +128,17 @@ void initBuffers() {
 	glUseProgram(program);
 }
 
-void draw() {
-	static const float black[] = { 0.0f, 0.0f, 0.0f, 0.0f};
-	glClearBufferfv(GL_COLOR, 0, black);
+// deprecated
+//void draw() {
+//	static const float black[] = { 0.0f, 0.0f, 0.0f, 0.0f};
+//	glClearBufferfv(GL_COLOR, 0, black);
+//
+//	// Draws using the data found in the VBO.
+//	glDrawArrays(GL_TRIANGLES, 0, 6);
+//}
 
-	// Draws using the data found in the VBO.
-	glDrawArrays(GL_TRIANGLES, 0, 6);
-}
 
-/* Loads the provided vertices into the VBO and calls the point to be drawn to the screen.
-   Currently no color support.
-   Performance implications of loading data to the buffer each frame and using the same VBO for multiple points must
-   be studied further.*/
-void drawPoint(float x, float y, float z, GLuint vbo) {
-	float vertices[3] = { x, y, z };
-	glBindBuffer(GL_ARRAY_BUFFER, vbo);
-	glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_STATIC_DRAW);
-	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 0, (void*)(0));
-	glEnableVertexAttribArray(0);
-	glDrawArrays(GL_POINTS, 0, 1);
-	glDisableVertexAttribArray(0);
-}
-/* Loads coordinate data into the VBO and draws the line defined by them to the screen.
-   Currently no color support.
-   Performance implications of loading data to the buffer each frame and using the same VBO for multiple points must
-   be studied further
-   TODO: Figure out how to use cglm vec3s as parameters
-   */
-void drawLine(float xs, float ys, float zs, float xe, float ye, float ze, GLuint vbo) {
-	float vertices[2][3] = {
-		{xs, ys, zs,},
-		{xe, ye, ze}
-	};
-	vec3 a = GLM_VEC2_ZERO_INIT;
-	glBindBuffer(GL_ARRAY_BUFFER, vbo);
-	glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_STATIC_DRAW);
-	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 0, (void*)(0));
-	glEnableVertexAttribArray(0);
-	glDrawArrays(GL_LINES, 0, 2);
-	glDisableVertexAttribArray(0);
-}
-/*Tracks and prints the FPS every second for sampleTime seconds
-Upon reaching sampleTime seconds, the program exits and the sampleTime second average is printed
-If exit is true (1), the program will not quit after is average FPS is calculated*/
-void updateFPSTracker(int sampleTime, int exit) {
-	GLdouble elapsedTime = glfwGetTime() - lastTime;
-	lastTime = glfwGetTime();
-	numFrames++;
-	//printf("\nTime Since Last Frame: %.8f", 1.0f/elapsedTime);
-	if (glfwGetTime() - checkTime > 1) {
-		printf("\n%.2f", numFrames);
-		checkTime = glfwGetTime();
-		if (frameChecks >= sampleTime) {
-			double avg = 0;
-			for (int i = 0; i < sampleTime; i++) {
-				avg += frameRates[i];
-			}
-			printf("\nAverage FPs over 10 seconds : %.2f FPS", avg / 10.0f);
-			if (exit == 1) {
-			quick_exit(0);
-			}
-		}
-		else {
-			frameRates[frameChecks] = numFrames;
-			frameChecks++;
-		}
 
-		numFrames = 0;
-	}
-}
 
 int main()
 {
@@ -240,26 +155,24 @@ int main()
 	}
 	
 	initBuffers();
-	checkTime = glfwGetTime();
+
+	glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
 
 	// TODO : Figure out way to stop this from producing GPU-melting number of frames
 	// Main loop which draws, updates, and polls events from the window. This must exist for the window to function
 	while (!glfwWindowShouldClose(window)) {
-
-		updateFPSTracker(10);
+		glClear(GL_COLOR_BUFFER_BIT);
+		updateFPSTracker(5, 0);
 		//yikes.. bad performance
 		// next thing to do is make a function to draw lines
 		for (float i = 0.0; i < 640; i++) {
-			//drawPoint((i/(float)320)-1, 0.0f, 1.0f, VBO);
-			//drawPoint((i / (float)320) - 1, 0.5f, 1.0f, VBO);
-			drawLine((i / (float)320) - 1, -0.5f, 1.0f, (i / (float)320) - 1, 0.5f, 1.0f, VBO);
+			
+			vec3 lineStart = { ( i / (640 / 2) - 1), -0.5f, 1.0f };
+			vec3 lineEnd = { (i / (640 / 2) - 1), 0.5f, 1.0f };
+
+			drawLine(lineStart, lineEnd, VBO);
 		}
 
-		
-
-		//drawPoint(0.0f, 0.0f, 1.0f, VBO);
-		//drawPoint(0.5f, 0.0f, 1.0f, VBO);
-		//draw();
 		// Swaps the display buffers of glfw. In other words, updates what's on screen.
 		glfwSwapBuffers(window);
 		// Processes events. Needed or else the window will be shown as not responding.
