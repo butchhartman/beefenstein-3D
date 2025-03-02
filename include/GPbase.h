@@ -3,16 +3,11 @@
 
 #pragma once
 // Ensures GLFW won't include the development environment header. This prevents conflicts upon inclusion of gl3w .
-#define GLFW_INCLUDE_NONE
 #define SDL_MAIN_USE_CALLBACKS 1 // uses callbacks instead of the main as an entry point
 
 #include <stdio.h>
 
-// OpenGL Extension loading library. 
-#include "GL3W/GL/gl3w.h"
-
 // Window creation library. Also handles other things like input.
-#include "GLFW/glfw3.h"
 #include "SDL3/SDL.h"
 #include "SDL3/SDL_main.h"
 // C compatible math library for OpenGL
