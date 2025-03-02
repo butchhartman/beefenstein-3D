@@ -28,6 +28,12 @@ add_executable (GPbase "src/GPbase.c"  "include/GPbase.h" "include/LoadShaders.h
 # Add libraries to this project's executable.
 # Simply can specify the name of the library because CMake knows to look in the lib folder.
 
+# Makes directories in the source directory visible as system directories (can be included by <>)
+# This allows libraries to work without me changing their include paths
+target_include_directories (GPbase SYSTEM PUBLIC "${PROJECT_SOURCE_DIR}/include")
+
+# TODO : Include cglm in project files
+
 target_link_libraries (GPbase glfw3 gl3wlib cglm SDL3)
 if (CMAKE_VERSION VERSION_GREATER 3.12)
   set_property(TARGET GPbase PROPERTY C_STANDARD 23)

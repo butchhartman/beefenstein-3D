@@ -12,7 +12,7 @@
 
 // Window creation library. Also handles other things like input.
 #include "GLFW/glfw3.h"
-
+#include "SDL3/SDL.h"
 // C compatible math library for OpenGL
 #include "cglm/cglm.h"
 
