@@ -23,12 +23,12 @@ add_subdirectory(extern)
 link_directories ("lib")
 
 # Add source to this project's executable.
-add_executable (GPbase "src/GPbase.c"  "include/GPbase.h" "include/LoadShaders.h"  "lib/LoadShaders.cpp" "src/DrawFuncs.c" "src/FPSProfiling.c" "include/CallbackFunctions.h" "src/CallbackFunctions.c" "include/CommonDefs.h")
+add_executable (GPbase "src/GPbase.c"  "include/GPbase.h" "include/LoadShaders.h"  "lib/LoadShaders.cpp" "src/DrawFuncs.c" "src/FPSProfiling.c" "include/CallbackFunctions.h" "src/CallbackFunctions.c" "include/CommonDefs.h" "include/SDL3/SDL.h")
 
 # Add libraries to this project's executable.
 # Simply can specify the name of the library because CMake knows to look in the lib folder.
 
-target_link_libraries (GPbase glfw3 gl3wlib cglm)
+target_link_libraries (GPbase glfw3 gl3wlib cglm SDL3)
 if (CMAKE_VERSION VERSION_GREATER 3.12)
   set_property(TARGET GPbase PROPERTY C_STANDARD 23)
 endif()
