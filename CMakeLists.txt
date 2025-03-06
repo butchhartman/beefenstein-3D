@@ -16,12 +16,8 @@ project ("GPbase")
 # gl3w will need to be recompiled and added in order to generate this library again.
 # add_library (LoadShaders STATIC "src/LoadShaders.cpp")
 
-# Add extern subdir
-add_subdirectory(extern)
-
 # Add link director(y/ies) for libraries
 link_directories ("lib")
-
 
 # Add source to this project's executable.
 add_executable (GPbase "src/sdlMain.c"  "include/GPbase.h" "include/SDL3/SDL.h")
@@ -33,7 +29,7 @@ target_include_directories (GPbase SYSTEM PUBLIC "${PROJECT_SOURCE_DIR}/include"
 # TODO : Include cglm in project files
 # Add libraries to this project's executable.
 # Simply can specify the name of the library because CMake knows to look in the lib folder.
-target_link_libraries (GPbase cglm SDL3)
+target_link_libraries (GPbase SDL3)
 
 # Copies the pre-compiled SDL3.dll to the EXE's directory. This allows the program to funciton find the DLL AND is distributable.
 # Note : This only occurs ONE TIME when the CMake generation is called. If it is removed, the program will fail to run.

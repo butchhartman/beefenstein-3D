@@ -10,24 +10,7 @@
 // Window creation library. Also handles other things like input.
 #include "SDL3/SDL.h"
 #include "SDL3/SDL_main.h"
-// C compatible math library for OpenGL
-#include "cglm/cglm.h"
 
-// Load shaders sourced from the OpenGL Red Book
-#include "LoadShaders.h"
-
-#include "DrawFuncs.h"
-
-#include "FPSProfiling.h"
-
-#include "CallbackFunctions.h"
-
-#include "CommonDefs.h"
-// Custom defines
-// Global variables
-// Bad practice but useful for this application.
-#define OPENGL_VERSION_MAJOR 4
-#define OPENGL_VERSION_MINOR 6
 
 
 #define DEFAULT_WIDTH 640
