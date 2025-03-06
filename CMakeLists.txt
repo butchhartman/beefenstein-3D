@@ -12,7 +12,7 @@ if("vendored/SDL3/CMakeLists.txt")
 	# add_subdirectory("vendored/SDL3")
 else()
 	#SDl3 files do not exist, clone them.
-	execute_process(COMMAND git submodule update)
+	execute_process(COMMAND git submodule update --init --recursive)
 #	add_custom_target(generate_vendored ALL COMMAND git submodule update --init -- vendored/SDL3 WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR})
 #	add_dependencies(${PROJECT_NAME} generate_vendored)
 endif()
