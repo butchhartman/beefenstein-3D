@@ -7,7 +7,13 @@ set(CMAKE_LIBRARY_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}")
 
 add_executable(${PROJECT_NAME} "src/SDLbase.c" "include/SDLbase.h")
 
-add_subdirectory("vendored/SDL3")
+if(EXISTS "vendored/SDL3")
+
+	add_subdirectory("vendored/SDL3")
+else()
+
+endif()
+
 target_link_libraries(${PROJECT_NAME} SDL3::SDL3)
 
 target_include_directories(${PROJECT_NAME} SYSTEM PUBLIC "${CMAKE_SOURCE_DIR}/include")
