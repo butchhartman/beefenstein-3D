@@ -7,7 +7,7 @@ set(CMAKE_LIBRARY_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}")
 
 add_executable(${PROJECT_NAME} "src/SDLbase.c" "include/SDLbase.h")
 
-if("vendored/SDL3")
+if("vendored/SDL3/CMakeLists.txt")
 	# SDL3 files already exist, use them
 	# add_subdirectory("vendored/SDL3")
 else()
