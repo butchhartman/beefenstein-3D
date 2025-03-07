@@ -17,6 +17,7 @@ float *drawData;
 
 #define MAPWIDTH 24
 #define MAPHEIGHT 24
+#define SENSITIVITY 1.75
 
 
 // This function runs once on startup
@@ -29,14 +30,17 @@ SDL_AppResult SDL_AppInit(void** appstate, int argc, char* argv[]) {
 		return SDL_APP_FAILURE;
 	}
 
-	if (!SDL_CreateWindowAndRenderer("SDLbase", windowWidth, windowHeight, SDL_WINDOW_RESIZABLE | , &window, &renderer)) {
+	if (!SDL_CreateWindowAndRenderer("SDLbase", windowWidth, windowHeight, SDL_WINDOW_RESIZABLE | SDL_WINDOW_MOUSE_GRABBED, &window, &renderer)) {
 		SDL_Log("Couldn't create window/renderer: %s", SDL_GetError());
 		return SDL_APP_FAILURE;
 	}
 
+	SDL_HideCursor();
 	FrameRate_init();
-	BeefPlayer_init(&player, 22.0, 12.0, -1.0, 0.0, 0.0, 0.66, 10.0);
-
+	BeefPlayer_init(&player, 22.0, 12.0, -1.0, 0.0, 0.0, 0.66, 4.5, 0.0f);
+	SDL_WarpMouseInWindow(window, 640 / 2, 480 / 2);
+	SDL_GetMouseState(&player.lastMouseX, NULL);
+	
 	drawData = (float*)malloc(DEFAULT_WIDTH * sizeof(float) * 5);
 
 	return SDL_APP_CONTINUE; // The init function ran successfully
@@ -45,13 +49,13 @@ SDL_AppResult SDL_AppInit(void** appstate, int argc, char* argv[]) {
 SDL_AppResult SDL_queryInputState(double deltatime) {
 	SDL_PumpEvents();
 	const unsigned char *keys = SDL_GetKeyboardState(NULL);;
+
 	if (keys[SDL_SCANCODE_W] == 1) {
 		if (worldMap[(int)(player.posX + player.dirX * player.moveSpeed * deltatime)][(int)player.posY] == 0) {
 			player.posX += player.dirX * player.moveSpeed * deltatime;
 		}
-		if (worldMap[(int)player.posX][(int)(player.posY + player.dirY * player.moveSpeed)] == 0) {
+		if (worldMap[(int)player.posX][(int)(player.posY + player.dirY * player.moveSpeed * deltatime)] == 0) {
 			player.posY += player.dirY * player.moveSpeed * deltatime;
-			printf("%f", deltatime);
 		}
 	}
 
@@ -63,6 +67,29 @@ SDL_AppResult SDL_queryInputState(double deltatime) {
 			player.posY -= player.dirY * player.moveSpeed * deltatime;
 		}
 	}
+
+	// Gets the mouse's current position in the window
+	float currentMouseX;
+	SDL_GetMouseState(&currentMouseX, NULL);
+
+	// Calculate the distance the mouse has moved (scaled with deltatime & sens)
+	double diff = (currentMouseX - player.lastMouseX) * deltatime * SENSITIVITY;
+
+	// Rotate the camera plane and view direction
+	double oldDirX = player.dirX;
+	player.dirX = player.dirX * cos(-diff) - player.dirY * sin(-diff);
+	player.dirY = oldDirX * sin(-diff) + player.dirY * cos(-diff);
+	double oldPlaneX = player.planeX;
+	player.planeX = player.planeX * cos(-diff) - player.planeY * sin(-diff);
+	player.planeY = oldPlaneX * sin(-diff) + player.planeY * cos(-diff);
+
+	// TODO : make work for any size screen
+
+	// Reset player's mouse to middle of window
+	SDL_WarpMouseInWindow(window, 640 / 2, 480 / 2);
+	// Get the mouse state and set the player's mouse position back to middle of screen
+	SDL_GetMouseState(&currentMouseX, NULL);
+	player.lastMouseX = currentMouseX;
 
 	return SDL_APP_CONTINUE;
 }
