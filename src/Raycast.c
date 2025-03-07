@@ -1,6 +1,7 @@
 #include "Raycast.h"
 // TODO : document
-
+extern Uint32 texture[8][64 * 64];
+extern Uint32 buffer[480][640];
 
 void Raycast_raycastMapFromPlayerView(SDL_Renderer *renderer ,BeefPlayer player, int w, int h, float *dest) {
 
@@ -84,33 +85,39 @@ void Raycast_raycastMapFromPlayerView(SDL_Renderer *renderer ,BeefPlayer player,
 
 		float color[3] = { 0 };
 
-		switch (worldMap[mapX][mapY]){
+		int texNum = worldMap[mapX][mapY] - 1;
 
-			case 1:
-				color[0] = 1.0f;
-				break;
-			case 2:
-				color[1] = 1.0f;
-				break;
-			case 3:
-				color[2] = 1.0f;
-				break;
-			case 4:
-				color[0] = 1.0f;
-				color[1] = 1.0f;
-				color[2] = 1.0f;
-				break;
-			default:
-				color[0] = 1.0f;
-				color[1] = 1.0f;
-				color[2] = 1.0f;
-				break;
+		double wallX;
+		if (side == 0) {
+			wallX = player.posY + perpWallDist * rayDirY;
+		}
+		else {
+			wallX = player.posX + perpWallDist * rayDirX;
+		}
+		wallX -= floor(wallX);
+
+		int texX = (int)(wallX * (double)(64)); // TODO : REPLACE 64 WITH TEXTURE WIDTH VARIABLE
+
+		if (side == 0 && rayDirX > 0) {
+			texX = 64 - texX - 1;  // TODO : REPLACE 64 WITH TEXTURE WIDTH VARIABLE
+		}
+		if (side == 1 && rayDirY < 0) {
+			texX = 64 - texX - 1;  // TODO : REPLACE 64 WITH TEXTURE WIDTH VARIABLE
 		}
 
-		if (side == 1) {
-			color[0] /= 2.0f;
-			color[1] /= 2.0f;
-			color[2] /= 2.0f;
+		double step = 1.0 * 64 / lineHeight;
+
+		double texPos = (drawStart - h / 2 + lineHeight / 2) * step;
+
+		for (int y = drawStart; y < drawEnd; y++) {
+			int texY = (int)texPos & (64 - 1);  // TODO : REPLACE 64 WITH TEXTURE WIDTH VARIABLE
+			texPos += step;
+			Uint32 color = texture[texNum][64 * texY + texX];  // TODO : REPLACE 64 WITH TEXTURE WIDTH VARIABLE
+
+			if (side == 1) {
+				color = (color >> 1) & 8355711;
+			}
+			buffer[y][x] = color;
 		}
 
 		dest[x * 5] = drawStart;

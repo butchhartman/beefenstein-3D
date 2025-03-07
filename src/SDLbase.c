@@ -14,6 +14,8 @@ BeefPlayer player;
 
 float *drawData;
 
+Uint32 buffer[DEFAULT_HEIGHT][DEFAULT_WIDTH];
+Uint32 texture[8][TEX_WIDTH * TEX_HEIGHT];
 
 #define MAPWIDTH 24
 #define MAPHEIGHT 24
@@ -42,6 +44,23 @@ SDL_AppResult SDL_AppInit(void** appstate, int argc, char* argv[]) {
 	SDL_GetMouseState(&player.lastMouseX, NULL);
 	
 	drawData = (float*)malloc(DEFAULT_WIDTH * sizeof(float) * 5);
+
+	for (int x = 0; x < TEX_WIDTH; x++) {
+		for (int y = 0; y < TEX_HEIGHT; y++) {
+			int xorcolor = (x * 256 / TEX_WIDTH) ^ (y * 256 / TEX_HEIGHT);
+
+			int yColor = y * 256 / TEX_HEIGHT;
+			int xyColor = y * 128 / TEX_HEIGHT + x * 128 / TEX_WIDTH;
+			texture[0][TEX_WIDTH * y + x] = 65536 * 254 * (x != y && x != TEX_WIDTH - y); // flat red with black cross
+			texture[1][TEX_WIDTH * y + x] = xyColor + 256 * xyColor + 65536 * xyColor; // sloped greyscale
+			texture[2][TEX_WIDTH * y + x] = 256 * xyColor + 65536 * xyColor; // sloped yellow gradient
+			texture[3][TEX_WIDTH * y + x] = xorcolor + 256 * xorcolor + 65536 * xorcolor; // xor greyscale
+			texture[4][TEX_WIDTH * y + x] = 256 * xorcolor; // xor green
+			texture[5][TEX_WIDTH * y + x] = 65536 * 192 * (x % 16 && y % 16); // red bricks
+			texture[6][TEX_WIDTH * y + x] = 65536 * yColor; // red gradient
+			texture[7][TEX_WIDTH * y + x] = 128 + 256 * 128 + 65536 * 128; // flat grey texture
+		}
+	}
 
 	return SDL_APP_CONTINUE; // The init function ran successfully
 }
@@ -195,13 +214,43 @@ SDL_AppResult SDL_AppIterate(void* appstate) {
 
 		float lineColors[3];
 		Raycast_translateLineColor(drawData, i, lineColors);
-
-		SDL_SetRenderDrawColorFloat(renderer, lineColors[0], lineColors[1], lineColors[2], 1);
+		SDL_SetRenderDrawColorFloat(renderer, 1, lineColors[1], lineColors[2], 1);
 		SDL_RenderLine(renderer, (float)i, lineVerts[0], (float)i, lineVerts[1]);
+
+		
+
 	}
-	
+	for (int y = 0; y < DEFAULT_HEIGHT; y++) {
+		for (int x = 0; x < DEFAULT_WIDTH; x++) {
+			//if (buffer[y][x] > 0) 
+			//for (int i = sizeof(buffer[y][x]) * 8 - 1; i >= 0; i--) {
+			//	printf("%d", (buffer[y][x] >> i) & 1);
+			//}
+
+			
+			unsigned int extracted_num8 = (buffer[y][x] >> 8) & 255;
+			unsigned int extracted_num16 = (buffer[y][x] >> 16) & 255;
+			unsigned int extracted_num24 = (buffer[y][x] >> 24) & 255;
+
+			//if (extracted_num8 > 0 || extracted_num16 > 0 || extracted_num16 > 0) {
+			//	printf("R : %u\n", extracted_num8);
+			//	printf("R : %u\n", extracted_num16);
+			//	printf("B : %u\n", extracted_num16);
+			//}
+			SDL_SetRenderDrawColor(renderer, extracted_num16, extracted_num8, extracted_num24, 255);
+			SDL_RenderPoint(renderer, x, y);
+			buffer[y][x] = 0;
+		}
+	}
+
+
 	// Put the newly-cleared rendering to the screen.
 	SDL_queryInputState(FrameRate_getDeltaTime());
+
+
+	//SDL_RenderPoints
+
+
 	SDL_RenderPresent(renderer);
 	FrameRate_updateCount();
 	return SDL_APP_CONTINUE; // Carry on with the program

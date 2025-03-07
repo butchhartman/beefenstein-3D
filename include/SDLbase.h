@@ -18,6 +18,9 @@
 #define DEFAULT_WIDTH 640
 #define DEFAULT_HEIGHT 480
 
+#define TEX_HEIGHT 64
+#define TEX_WIDTH 64
+
 extern int worldMap[24][24];
 
 
