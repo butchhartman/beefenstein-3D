@@ -17,8 +17,7 @@ float *drawData;
 
 #define MAPWIDTH 24
 #define MAPHEIGHT 24
-#define SENSITIVITY 1.75
-
+#define SENSITIVITY 1
 
 // This function runs once on startup
 SDL_AppResult SDL_AppInit(void** appstate, int argc, char* argv[]) {
@@ -34,18 +33,21 @@ SDL_AppResult SDL_AppInit(void** appstate, int argc, char* argv[]) {
 		SDL_Log("Couldn't create window/renderer: %s", SDL_GetError());
 		return SDL_APP_FAILURE;
 	}
+	BeefPlayer_init(&player, 22.0, 12.0, -1.0, 0.0, 0.0, 0.66, 4.5, 0.0f);
+	FrameRate_init();
 
 	SDL_HideCursor();
-	FrameRate_init();
-	BeefPlayer_init(&player, 22.0, 12.0, -1.0, 0.0, 0.0, 0.66, 4.5, 0.0f);
-	SDL_WarpMouseInWindow(window, 640 / 2, 480 / 2);
+	SDL_GetWindowSize(window, &windowWidth, &windowHeight);
+	SDL_WarpMouseInWindow(window, windowWidth / 2, windowHeight / 2);
 	SDL_GetMouseState(&player.lastMouseX, NULL);
 	
 	drawData = (float*)malloc(DEFAULT_WIDTH * sizeof(float) * 5);
 
 	return SDL_APP_CONTINUE; // The init function ran successfully
 }
-
+/*
+Checks state of keyboard every frame.
+*/
 SDL_AppResult SDL_queryInputState(double deltatime) {
 	SDL_PumpEvents();
 	const unsigned char *keys = SDL_GetKeyboardState(NULL);;
@@ -112,7 +114,7 @@ SDL_AppResult SDL_queryInputState(double deltatime) {
 	SDL_GetMouseState(&currentMouseX, NULL);
 
 	// Calculate the distance the mouse has moved (scaled with deltatime & sens)
-	double diff = (currentMouseX - player.lastMouseX) * deltatime * SENSITIVITY;
+	double diff = (currentMouseX - player.lastMouseX) * SENSITIVITY/1000.0f;
 
 	// Rotate the camera plane and view direction
 	double oldDirX = player.dirX;
@@ -125,7 +127,7 @@ SDL_AppResult SDL_queryInputState(double deltatime) {
 	// TODO : make work for any size screen
 
 	// Reset player's mouse to middle of window
-	SDL_WarpMouseInWindow(window, 640 / 2, 480 / 2);
+	SDL_WarpMouseInWindow(window, windowWidth / 2, windowHeight / 2);
 	// Get the mouse state and set the player's mouse position back to middle of screen
 	SDL_GetMouseState(&currentMouseX, NULL);
 	player.lastMouseX = currentMouseX;
@@ -168,7 +170,14 @@ SDL_AppResult SDL_AppEvent(void* appstate, SDL_Event* event) {
 
 // This function runs once per frame. It is the beating heart behind the program
 SDL_AppResult SDL_AppIterate(void* appstate) {
+	// Allow for window resizing
+	int lastWindowWidth = windowWidth;
 	SDL_GetWindowSize(window, &windowWidth, &windowHeight);
+	if (lastWindowWidth != windowWidth) {
+		float* newptr;
+		newptr = (float*)realloc(drawData, windowWidth * sizeof(float) * 5);
+		drawData = newptr;
+	}
 
 	const double now = ((double)SDL_GetTicks()) / 1000.0f; // converts from ms to s
 	
@@ -195,7 +204,6 @@ SDL_AppResult SDL_AppIterate(void* appstate) {
 	SDL_queryInputState(FrameRate_getDeltaTime());
 	SDL_RenderPresent(renderer);
 	FrameRate_updateCount();
-
 	return SDL_APP_CONTINUE; // Carry on with the program
 }
 
