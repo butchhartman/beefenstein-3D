@@ -7,14 +7,14 @@
 #define PRINT_FR
 
 #include <stdio.h>
-#include <stdlib.h>
 
 // Window creation library. Also handles other things like input and audio.
 #include "SDL3/SDL.h"
 #include "SDL3/SDL_main.h"
 
 #include "FrameRate.h"
-
+#include "BeefPlayer.h"
+#include "Raycast.h"
 
 #define DEFAULT_WIDTH 640
 #define DEFAULT_HEIGHT 480
