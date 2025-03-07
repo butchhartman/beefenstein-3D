@@ -50,23 +50,62 @@ SDL_AppResult SDL_queryInputState(double deltatime) {
 	SDL_PumpEvents();
 	const unsigned char *keys = SDL_GetKeyboardState(NULL);;
 
+	/*
+	How I fixed my issues relating to the movement sytem:
+	Before I was just moving along the player's facing direction for W and moving along its negative version for S.
+	Then, for A and D, I would rotate the player's facing direction by 45 degrees and use that if a strafe and forward/back key was pressed simultaneously.
+	Otherwise, for only a strafe input, I would rotate the front direction by 90 degrees and use that.
+
+	This was inefficient and had a major problem in that you could not walk backwards and strafe in the correct direction.
+
+	These problems were solved by creating a movement direction variable and adding the previously described vectors to it when their respective movement key is being pressed.
+	The only problem with this approach was moving too fast on diagnols, which was fixed by simply normalizing the vector before applying the movement step.
+	*/
+
+	double moveDirX = 0;
+	double moveDirY = 0;
+
 	if (keys[SDL_SCANCODE_W] == 1) {
-		if (worldMap[(int)(player.posX + player.dirX * player.moveSpeed * deltatime)][(int)player.posY] == 0) {
-			player.posX += player.dirX * player.moveSpeed * deltatime;
-		}
-		if (worldMap[(int)player.posX][(int)(player.posY + player.dirY * player.moveSpeed * deltatime)] == 0) {
-			player.posY += player.dirY * player.moveSpeed * deltatime;
-		}
+		moveDirX += player.dirX;
+		moveDirY += player.dirY;
+	}
+	if (keys[SDL_SCANCODE_S] == 1) {
+		moveDirX += -player.dirX;
+		moveDirY += -player.dirY;
 	}
 
-	if (keys[SDL_SCANCODE_S] == 1) {
-		if (worldMap[(int)(player.posX - player.dirX * player.moveSpeed * deltatime)][(int)player.posY] == 0) {
-			player.posX -= player.dirX * player.moveSpeed * deltatime;
-		}
-		if (worldMap[(int)player.posX][(int)(player.posY - player.dirY * player.moveSpeed * deltatime)] == 0) {
-			player.posY -= player.dirY * player.moveSpeed * deltatime;
-		}
+	if (keys[SDL_SCANCODE_D]) {
+		moveDirX += player.dirX * cos(-M_PI_2) - player.dirY * sin(-M_PI_2);
+		moveDirY += player.dirY * cos(-M_PI_2) + player.dirX * sin(-M_PI_2);
 	}
+
+	if (keys[SDL_SCANCODE_A]) {
+		moveDirX += player.dirX * cos(M_PI_2) - player.dirY * sin(M_PI_2);
+		moveDirY += player.dirY * cos(M_PI_2) + player.dirX * sin(M_PI_2);
+	}
+	//printf("%.20f, %.20f\n", moveDirX, moveDirY);
+	// vector normalization
+	double vecLength = sqrt(pow(moveDirX, 2) + pow(moveDirY, 2));
+	//printf("ORIGINAL VEC LENGTH: %f\n", vecLength);
+	
+	// avoid dividing 0/0
+	// Comparing the moveDir <= 0.001 because direction rotations cause the movement vectors to not quite be 0, resulting in undefined behavior when all movement keys are held down. 
+	// fabs is necessary, otherwise negative movement vectors will be clipped
+	moveDirX = (fabs(moveDirX) <= 0.001 ) ? 0 : moveDirX/vecLength;
+	moveDirY = (fabs(moveDirY) <= 0.001) ? 0 : moveDirY/vecLength;
+
+	//vecLength = sqrt(pow(moveDirX, 2) + pow(moveDirY, 2));
+	//printf("NORMAL VEC LENGTH: %f\n", vecLength);
+
+	if (worldMap[(int)(player.posX + moveDirX * player.moveSpeed * deltatime)][(int)player.posY] == 0) {
+		player.posX += moveDirX * player.moveSpeed * deltatime;
+	}
+	if (worldMap[(int)player.posX][(int)(player.posY + moveDirY * player.moveSpeed * deltatime)] == 0) {
+		player.posY += moveDirY * player.moveSpeed * deltatime;
+	}
+
+
+
 
 	// Gets the mouse's current position in the window
 	float currentMouseX;
