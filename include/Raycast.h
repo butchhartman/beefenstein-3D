@@ -1,13 +1,14 @@
 #pragma once
 
-#define MAPWIDTH 24
-#define MAPHEIGHT 24
+
 
 #include <math.h>
 
 #include "SDL3/SDL.h"
 
 #include "BeefPlayer.h"
+
+extern int worldMap[24][24];
 
 void Raycast_raycastMapFromPlayerView(SDL_Renderer* renderer, BeefPlayer player, int w, int h, float *dest);
 

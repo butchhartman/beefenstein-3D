@@ -5,7 +5,7 @@ project(SDLbase)
 set(CMAKE_RUNTIME_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}")
 set(CMAKE_LIBRARY_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}")
 
-add_executable(${PROJECT_NAME} "src/SDLbase.c" "include/SDLbase.h" "include/FrameRate.h" "src/FrameRate.c" "include/Raycast.h" "src/Raycast.c" "include/BeefPlayer.h" "src/Player.c")
+add_executable(${PROJECT_NAME} "src/SDLbase.c" "include/SDLbase.h" "include/FrameRate.h" "src/FrameRate.c" "include/Raycast.h" "src/Raycast.c" "include/BeefPlayer.h" "src/BeefPlayer.c" "src/WorldMap.c")
 
 if(NOT "vendored/SDL3/CMakeLists.txt")
 	#SDl3 files do not exist, clone them.

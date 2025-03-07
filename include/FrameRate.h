@@ -9,3 +9,5 @@ double FrameRate_calculateAverageFPS();
 void FrameRate_printAverageFPS();
 
 void FrameRate_cleanUp();
+
+double FrameRate_getDeltaTime();

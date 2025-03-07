@@ -2,7 +2,9 @@
 
 int sampleCount = 5;
 
-double lastTime = 0.0f;
+Uint64 lastTime = 0.0f;
+
+double deltaTime = 0.0f;
 
 double *FPS;
 
@@ -12,9 +14,9 @@ void FrameRate_init() {
 
 void FrameRate_updateCount()
 {
-	const double now = ((double)SDL_GetTicks()) / 1000.0f; // converts from ms to s
-
-	FPS[(int)now % sampleCount] = 1.0f / (now - lastTime);
+	const Uint64 now = SDL_GetPerformanceCounter(); 
+	deltaTime = (double)(((now - lastTime)) / ((double)SDL_GetPerformanceFrequency()));
+	FPS[(int)(SDL_GetTicks()/1000.0f) % sampleCount] = 1.0 / deltaTime;
 
 	lastTime = now;
 }
@@ -31,7 +33,7 @@ double FrameRate_calculateAverageFPS()
 
 void FrameRate_printAverageFPS()
 {
-	printf("Average FPS : %.2f \n", FrameRate_calculateAverageFPS());
+	printf("Average FPS : %.20f \n", FrameRate_calculateAverageFPS());
 }
 
 void FrameRate_setSampleCount(int count) {
@@ -40,4 +42,9 @@ void FrameRate_setSampleCount(int count) {
 
 void FrameRate_cleanUp() {
 	free(FPS);
+}
+
+double FrameRate_getDeltaTime()
+{
+	return deltaTime;
 }
